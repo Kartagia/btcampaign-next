@@ -1,0 +1,122 @@
+:root {
+  --background: #a9a9a9;
+  --foreground: #000080;
+  --primary: #000060;
+  --primary-text: --background;
+  --primary-disabled: --primary;
+  --primary-text-disabled: --foreground;
+  --secondary: #000040;
+  --secondary-text: #808080;
+  --secondary-text-disabled: black;
+  --secondary-disabled: #000020;
+  --secondary-selected: --secondary-text;
+  --secondary-text-selected: --secondary;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #000080;
+    --foreground: #a9a9a9;
+    --primary-text: #000060;
+    --primary: --background;
+    --primary-disabled: --primary;
+    --primary-text-disabled: --foreground;
+    --secondary-text: #000040;
+    --secondary: #808080;
+    --secondary-disabled: black;
+    --secondary--text-disabled: #000020;
+    --secondary-selected: --secondary-text;
+    --secondary-text-selected: --secondary;
+    }
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+nav {
+  border-radius: 0.5em;
+  border-style: solid;
+  border-width: 1px;
+  height: auto;
+}
+
+nav > ul.nav {
+  display: block;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: var(--primary);
+  color: var(--primary-text);
+  margin-left: 0.2em;
+  padding-right: 0.2em;
+  border-radius: 0.1em;
+  margin: 0;
+  margin: 0.5em;
+  height: 100%;
+}
+
+ul.nav > li {
+  float: left;
+  display: block;
+  border-color: var(--secondary);
+  color: var(--secondary-text);
+  background-color: var(--secondary);
+  border-radius: 0.1em;
+  margin-right: 0.2em;
+  height: 100%;
+  margin: 0.2em;
+  padding: 1px;
+  margin-bottom: 0em;
+}
+
+ul.nav > li:hover {
+  background-color: #c9c9c9;
+  color: #000080;
+  background-color: var(--secondary);
+  color: var(--secondary-text);
+  border-color: var(--secondary-text);
+
+}
+ul.nav > li.selected, ul.nav li.current {
+  background-color: var(--primary-selected);
+  color: var(--primary-text-selected);
+  border-color: var(--primary-text-selected);
+}
+ul.nav > li.selected:hover {
+  border-color: var(--primary-text-selected);
+}
+
+
+ul.nav > li.selected {
+  border-color: var(--primary);
+
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}

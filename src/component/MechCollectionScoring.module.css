@@ -1,0 +1,101 @@
+.MechModel {
+    --border-color: #000080;
+}
+
+.MechModel {
+    background-color: gray;
+    border-radius: 2px;
+    border: solid 1px;
+    padding: 3px;
+    width: 100px;
+}
+
+.MechModel main {
+    border-style: double;
+    border-radius: 0px;
+    border-width: 3px;
+    align-items: center;
+    text-align: center;
+}
+
+.MechModel footer {
+    border-style: double;
+    border-radius: 0px 0px 3px 3px;
+    border-width: 3px;
+    align-items: center;
+    text-align: center;
+}
+
+
+.scoringMechs {
+    width: 100%;
+    border-color: currentColor;
+    padding: 5px;
+    border-style: double;
+    border-radius: 5px;
+    border-width: 3px;
+    align-items: center;
+}
+
+.scoringMechs header {
+    align-items: center;
+    text-align: center;
+    border-style: double;
+    border-radius: 5px 5px 0px 0px;
+    border-width: 3px;
+}
+
+.scoringMechs > nav,
+.scoringMechs > main {
+    border-style: double;
+    border-radius: 0px;
+    border-width: 3px;
+    border-color: currentColor;
+}
+
+.scoringMechs main {
+    display: flex;
+}
+.scorinMechs main article {
+    display: flexbox;
+}
+
+.scorinMechs footer {
+    align-items: center;
+    text-align: center;
+    border-style: double;
+    border-radius: 0px 0px 5px 5px;
+    border-width: 3px;
+}
+
+.MechModel header,
+.MechModel main,
+.MechModel footer {
+    align-items: center;
+    text-align: center;
+    color: green;
+    background-color: #000080;
+    margin-left: auto;
+}
+
+.center {
+    align-items: center;
+    align-content: center;
+    text-align: center;
+    padding: 2em;
+}
+
+.MechModel header::after,
+.MechModel main::after {
+    border-bottom-width: 3px;
+    border-bottom-style: solid;
+    border-bottom-color: #000080;
+}
+
+
+@media (prefers-color-scheme: dark) {
+
+    .MechModel {
+        --border-color: #c9c9c9;
+    }
+}
