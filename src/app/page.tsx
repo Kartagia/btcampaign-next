@@ -1,25 +1,10 @@
 import Image from "next/image";
 import styles from "./page.module.css";
 
-import CampaignScoring from "../component/CampaingScoring.jsx";
-
 export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-      <CampaignScoring model={
-        {
-          mechs: {
-            parts: {
-
-            },
-            stored: {
-
-            }, 
-            bays: []
-          }
-        }
-      }></CampaignScoring>
         <Image
           className={styles.logo}
           src="/next.svg"
