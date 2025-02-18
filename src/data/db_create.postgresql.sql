@@ -139,7 +139,10 @@ create table if not exists  mech_storage_bays(
     primary key (storageId, bayId)
 );
 
+drop table if exists mech_storage_chassis;
 create table if not exists mech_storage_chassis(
     storageId int not null references mech_storage(id) on update cascade on delete cascade,
-    chassisId int not null references unit(id) on update cascade on delete cascade
+    chassisId int not null references unit(id) on update cascade on delete cascade,
+    count smallint default 1,
+    primary key (storageId, chassisId);
 )
