@@ -161,7 +161,7 @@ export function totalWeight<TYPE>(source: Map<TYPE, Equipment[]|Equipment>|Equip
 }
 
 /**
- * 
+ * A stored mech. 
  */
 export class StoredMech extends Mech {
 
