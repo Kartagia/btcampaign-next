@@ -3,12 +3,12 @@
 /**
  * The weight class types. 
  */
-type WeightClassType = "Light"|"Medium"|"Heavy"|"Assault"|"Super Heavy";
+export type WeightClassType = "Light"|"Medium"|"Heavy"|"Assault"|"Super Heavy";
 
 /**
  * The interface of any unit.
  */
-interface Unit {
+export interface Unit {
     /**
      * The model of the unit.
      */
@@ -39,7 +39,7 @@ interface Unit {
 /**
  * The mech types. 
  */
-type MechType = ("Quad"|"Humanoid");
+export type MechType = ("Quad"|"Humanoid");
 
 /**
  * Class representing a mech.
@@ -161,7 +161,7 @@ export function totalWeight<TYPE>(source: Map<TYPE, Equipment[]|Equipment>|Equip
 }
 
 /**
- * 
+ * A stored mech. 
  */
 export class StoredMech extends Mech {
 
