@@ -1,11 +1,11 @@
 
 import { Mech } from "@/data/mechs";
-import type { Unit } from "@/data/mechs";
+import type { MechType, Unit } from "@/data/mechs";
 import { Content, Rowdies } from "next/font/google";
 import { notFound } from "next/navigation";
 import { stringify } from "querystring";
 import internal from "stream";
-import { Client, Configuration, connect, DataType } from "ts-postgres";
+import { Client, Configuration, connect, DataType, Result, ResultRow } from "ts-postgres";
 import { resourceLimits } from "worker_threads";
 
 /**
@@ -238,7 +238,7 @@ export class NotFoundException<ID> extends Exception<ID> {
      * @param msg The excpetion message. Defaults to the {@link #defaultMessage}
      * @param id 
      */
-    constructor(msg: string = NotFoundException.DefaultMessage, id : ID|undefined = undefined) {
+    constructor(msg: string = NotFoundException.DefaultMessage, id: ID | undefined = undefined) {
         super(msg);
     }
 }
@@ -395,9 +395,9 @@ export class PqMechDao extends MechDao {
      * @returns A safe integer or a bigint of the identifier.
      * @throws {SyntaxError} The value was not a valid identifier. 
      */
-    parseId(id: string): number|bigint {
+    parseId(id: string): number | bigint {
         if (/^0*[\da-fA-F]+$/.test(id)) {
-            if (id.length*4 > 52) {
+            if (id.length * 4 > 52) {
                 // We need bigint.
                 return BigInt("0x" + id);
             } else {
@@ -438,7 +438,7 @@ export class PqMechDao extends MechDao {
             return this._pqConnection.query<ResultType>("SELECT id, model, name, weightClass, tonnage FROM Mech;").then(
                 (result) => {
                     const array: Array<[string, Mech]> = result.rows.map((row) => {
-                        return [row.get("id").valueOf().toString(16), new Mech(row.get("model").toString(), row.get("name").toString(), "Humanoid", Number(row.get("tonnage").valueOf()))]
+                        return [row.get("id").valueOf().toString(16), this.parseMech(row)];
                     });
                     return array;
                 }
@@ -448,17 +448,46 @@ export class PqMechDao extends MechDao {
         }
     }
 
+    /**
+     * Parse a mech type.
+     * @param type The parsed type.
+     * @returns The mech type.
+     * @throws {SyntaxError} The value was not a valid mech type.
+     */
+    parseMechType(type: string): MechType {
+        switch (type) {
+            case "Humanoid": case "Quad": return type;
+            default:
+                throw new SyntaxError("Invalid mech type");
+        }
+    }
+
+    /**
+     * Prase a m
+     * @param dbData The database result row for a mech query.
+     * @returns The mech of the database mech query.
+     * @throws {SyntaxError} The result row did not reprsent a valid mech.
+     */
+    parseMech(dbData: ResultRow<Mech>): Mech {
+        return new Mech(dbData.get("model").toString(), dbData.get("name").toString(), this.parseMechType(dbData.get("type").toString()),
+            Number(dbData.get("tonnage").valueOf()));
+    }
+
     get(id: string): Promise<Mech> {
         if (this._pqConnection != null) {
-            type ResultType = Mech;
-            return this._pqConnection.query<ResultType>("SELECT model, name, weightClass, tonnage FROM Mech WHERE id=$1;", [Number.parseInt(id, 16)]).then(
-                (result) => {
-                    if (result.rows.length == 1) {
-                        return new Mech(result.rows[0].get("model").toString(), result.rows[0].get("name").toString(), "Humanoid", Number(result.rows[0].get("tonnage").valueOf()));
-                    } else {
-                        throw new NotFoundException("No mech found", id);
-                    }
-                });
+            try {
+                type ResultType = Mech;
+                return this._pqConnection.query<ResultType>("SELECT model, name, weightClass, tonnage FROM Mech WHERE id=$1;", [this.parseId(id)]).then(
+                    (result) => {
+                        if (result.rows.length == 1) {
+                            return this.parseMech(result.rows[0]);
+                        } else {
+                            throw new NotFoundException("No mech found", id);
+                        }
+                    });
+            } catch (error) {
+                return Promise.reject(error);
+            }
         } else {
             return Promise.reject(new NotFoundException("No connection to database"));
         }
@@ -467,23 +496,27 @@ export class PqMechDao extends MechDao {
 
     update(id: string, mech: Mech): Promise<void> {
         if (this._pqConnection != null) {
-            type ResultType = Mech & { id: number };
-            return this._pqConnection.query<ResultType>("UPDATE Mech SET model=$1, name=$2, weightClass=$3, tonnage=$4 WHERE id=$5;",
-                [mech.model, mech.name, mech.weightClass, mech.tonnage, Number.parseInt(id, 16)]
-            ).then(
-                (result) => {
-                    const status = parseStatus(result.status);
-                    if (status.affectedRows == 0) {
-                        throw new NotFoundException("Cannot update a non-existing mech");
-                    } else {
-                        return undefined;
-                    }
+            try {
+                type ResultType = Mech & { id: number };
+                return this._pqConnection.query<ResultType>("UPDATE Mech SET model=$1, name=$2, weightClass=$3, tonnage=$4 WHERE id=$5;",
+                    [mech.model, mech.name, mech.weightClass, mech.tonnage, this.parseId(id)]
+                ).then(
+                    (result) => {
+                        const status = parseStatus(result.status);
+                        if (status.affectedRows == 0) {
+                            throw new NotFoundException("Cannot update a non-existing mech");
+                        } else {
+                            return undefined;
+                        }
 
-                },
-                (error) => {
-                    throw new InvalidContentException("The mech was invalid", mech);
-                }
-            );
+                    },
+                    (error) => {
+                        throw new InvalidContentException("The mech was invalid", mech);
+                    }
+                );
+            } catch (error) {
+                return Promise.reject(error);
+            }
         } else {
             return Promise.reject(new NotFoundException("No database available"));
         }
@@ -492,18 +525,22 @@ export class PqMechDao extends MechDao {
 
     delete(id: string): Promise<boolean> {
         if (this._pqConnection != null) {
-            type ResultType = Mech & { id: number };
-            return this._pqConnection.query<ResultType>("DELETE FROM Mech WHERE id=$1;",
-                [Number.parseInt(id, 16)]
-            ).then(
-                (result) => {
-                    const status = parseStatus(result.status);
-                    return status.affectedRows == 1;
-                },
-                (error) => {
-                    throw error;
-                }
-            );
+            try {
+                type ResultType = Mech & { id: number };
+                return this._pqConnection.query<ResultType>("DELETE FROM Mech WHERE id=$1;",
+                    [this.parseId(id)]
+                ).then(
+                    (result) => {
+                        const status = parseStatus(result.status);
+                        return status.affectedRows == 1;
+                    },
+                    (error) => {
+                        throw error;
+                    }
+                );
+            } catch (error) {
+                return Promise.reject(error);
+            }
         } else {
             return Promise.reject(new NotFoundException("No database available"));
         }
